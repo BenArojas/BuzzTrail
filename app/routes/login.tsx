@@ -43,7 +43,7 @@ import type {
           });
         } catch (error) {
           return data(
-            { error: "Email already used. pleasu use differnct email" },
+            { error: "Email already used. please use different email" },
             { status: 400 }
           );
         }
