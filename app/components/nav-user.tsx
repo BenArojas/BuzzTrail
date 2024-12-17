@@ -1,3 +1,4 @@
+import { Form, useFetcher } from "@remix-run/react"
 import {
   BadgeCheck,
   Bell,
@@ -38,6 +39,10 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const fetcher = useFetcher()
+  const handleLogout = () => {
+    fetcher.submit("", {action:"/logout", method: "POST"})
+  }
 
   return (
     <SidebarMenu>
@@ -100,7 +105,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
