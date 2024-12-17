@@ -1,9 +1,9 @@
-import * as React from "react"
-import { Plus } from "lucide-react"
+import * as React from "react";
+import { Check, ChevronRight, Plus } from "lucide-react";
 
-import { Calendars } from "~/components/calendars"
-import { DatePicker } from "~/components/date-picker"
-import { NavUser } from "~/components/nav-user"
+import { Adventures } from "~/components/adventures";
+import { DatePicker } from "~/components/date-picker";
+import { NavUser } from "~/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -14,32 +14,51 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-} from "~/components/ui/sidebar"
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+} from "~/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./ui/collapsible";
+import { Adventure } from "@prisma/client";
 
 // This is sample data.
 const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar:
+      "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.britannica.com%2Fanimal%2Fcat&psig=AOvVaw3RShbRfsrkKYyz5-92YnzK&ust=1734523270354000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMC4m-7grooDFQAAAAAdAAAAABAE",
   },
-  calendars: [
+  adventures: [
     {
-      name: "My Calendars",
-      items: ["Personal", "Work", "Family"],
+      id: 1,
+      name: "Adventure 1",
+      description: "This is a fun adventure",
+      date: new Date(),
     },
     {
-      name: "Favorites",
-      items: ["Holidays", "Birthdays"],
+      id: 2,
+      name: "Adventure 2",
+      description: "Another adventure",
+      date: new Date(),
     },
     {
-      name: "Other",
-      items: ["Travel", "Reminders", "Deadlines"],
+      id: 3,
+      name: "Adventure 3",
+      description: "A third adventure",
+      date: new Date(),
     },
   ],
-}
+};
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  adventures: Adventure[];
+}
+export function AppSidebar({ adventures, ...props }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="h-16 border-b border-sidebar-border">
@@ -48,7 +67,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <DatePicker />
         <SidebarSeparator className="mx-0" />
-        <Calendars calendars={data.calendars} />
+        <Adventures adventures={adventures} />
+        <SidebarSeparator className="mx-0" />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -62,5 +82,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

@@ -13,10 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String 
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  email      String      @unique
+  name       String
   password   String
+  adventures Adventure[]
+}
+
+model Adventure {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  name        String
+  description String   @db.Text
+  startDate   DateTime
+  endDate     DateTime
+
+  // This field is used to store the status of the adventure (e.g., "active", "completed")
+  status String
 }
