@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Mountain } from "lucide-react";
 
 import {
   Collapsible,
@@ -33,10 +33,11 @@ export function Adventures({ adventures }: { adventures: Adventure[] }) {
         <Collapsible className="group/collapsible">
           <SidebarGroupLabel
             asChild
-            className="group/label w-full text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="group/label w-full text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground p-0 gap-2"
           >
             <CollapsibleTrigger>
-              {"My Adventures"}
+              <Mountain />
+              <span>My Adventures</span>
               <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
             </CollapsibleTrigger>
           </SidebarGroupLabel>

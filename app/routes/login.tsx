@@ -5,7 +5,7 @@ import type {
   } from "@remix-run/node";
   import { data, Form, redirect, useActionData } from "@remix-run/react";
   import { useState } from "react";
-  import { addUser, authenticateCredentials } from "users";
+  import { addUser, authenticateCredentials } from "~/db/users.server";
   import { requireAnonymous } from "~/auth/auth";
   import { authCookie } from "~/sessions/auth";
   

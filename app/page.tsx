@@ -17,7 +17,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-black/80 border-yellow-500/50 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-yellow-500 font-bold">Next Trip</CardTitle>
+              <CardTitle className="text-yellow-500 font-bold">Time Left</CardTitle>
               <Calendar className="h-5 w-5 text-yellow-500" />
             </CardHeader>
             <CardContent>

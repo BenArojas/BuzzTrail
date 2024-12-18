@@ -30,10 +30,23 @@ model Adventure {
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   name        String
+  country     String
+  state       String?
+  location    String
   description String   @db.Text
   startDate   DateTime
   endDate     DateTime
+  budget      Int?
+  // This field is used to store the difficulty level of the adventure (e.g., "easy", "medium", "hard")
+  difficulty  String
+  notes       String?
 
   // This field is used to store the status of the adventure (e.g., "active", "completed")
-  status String
+  status AdventureStatus @default(NOT_STARTED)
+}
+
+enum AdventureStatus {
+  NOT_STARTED
+  ACTIVE
+  COMPLETED
 }

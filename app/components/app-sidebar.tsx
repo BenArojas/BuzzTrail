@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronRight, Plus } from "lucide-react";
+import { Check, ChevronRight, Plus, House, Mountain } from "lucide-react";
 
 import { Adventures } from "~/components/adventures";
 import { DatePicker } from "~/components/date-picker";
@@ -17,6 +17,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  sidebarMenuButtonVariants,
 } from "~/components/ui/sidebar";
 import {
   Collapsible,
@@ -24,6 +25,8 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { Adventure } from "@prisma/client";
+import { Link } from "@remix-run/react";
+import { cn } from "~/lib/utils";
 
 // This is sample data.
 const data = {
@@ -64,19 +67,27 @@ export function AppSidebar({ adventures, ...props }: AppSidebarProps) {
       <SidebarHeader className="h-16 border-b border-sidebar-border">
         <NavUser user={data.user} />
       </SidebarHeader>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Link className={cn(sidebarMenuButtonVariants())} to={`/`}>
+            <House />
+            Home
+          </Link>
+        </SidebarMenuItem>
+      </SidebarMenu>
       <SidebarContent>
-        <DatePicker />
         <SidebarSeparator className="mx-0" />
         <Adventures adventures={adventures} />
         <SidebarSeparator className="mx-0" />
+        <DatePicker />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <Link className={cn(sidebarMenuButtonVariants())} to={`/new-adventure`}>
               <Plus />
-              <span>New Adventure</span>
-            </SidebarMenuButton>
+              New Adventure
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

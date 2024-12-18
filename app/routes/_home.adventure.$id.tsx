@@ -40,7 +40,7 @@ export default function Index() {
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         <Card className="bg-black/50 border-yellow-500/50 shadow-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="font-bold">Next Trip</CardTitle>
+            <CardTitle className="font-bold">Time Left</CardTitle>
             <Calendar className="h-5 w-5 " />
           </CardHeader>
           <CardContent>
