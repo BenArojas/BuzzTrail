@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@remix-run/react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRemixForm } from "remix-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -41,6 +41,7 @@ const formSchema = z.object({
   location: z.string(),
   description: z.string(),
   budget: z.coerce.number().optional(),
+  participants: z.coerce.number(),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   difficulty: z.string(),
@@ -59,6 +60,14 @@ export default function NewAdventureForm() {
     },
     resolver,
     defaultValues: {
+      name: undefined,
+      country: undefined,
+      location: undefined,
+      description: undefined,
+      budget: 0,
+      participants: 0,
+      difficulty: undefined,
+      notes: "",
       startDate: new Date(),
       endDate: new Date(),
     },
@@ -66,6 +75,18 @@ export default function NewAdventureForm() {
       _action: "create",
     },
   });
+
+  const { reset, formState } = form;
+  const { isSubmitSuccessful } = formState;
+
+  // Reset the form when the submission is successful
+  // might not be necessary since we redirect to the newly created adventure - let Yahel check
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset();
+      setCurrentPage(1)
+    }
+  }, [isSubmitSuccessful, reset]);
 
   const handleNext = () => {
     // Validate first page fields before moving to next page
@@ -186,20 +207,21 @@ export default function NewAdventureForm() {
 
             <FormField
               control={form.control}
-              name="budget"
+              name="participants"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Budget</FormLabel>
+                  <FormLabel>Participants</FormLabel>
                   <FormControl>
                     <Input placeholder="$$$" type="number" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Fill the budget for the Adventure
+                    How many participants will join the adventure
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <div className="flex justify-end">
               <Button type="button" onClick={handleNext}>
                 Next
@@ -293,6 +315,22 @@ export default function NewAdventureForm() {
 
             <FormField
               control={form.control}
+              name="budget"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Budget</FormLabel>
+                  <FormControl>
+                    <Input placeholder="$$$" type="number" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Fill the budget for the Adventure
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="difficulty"
               render={({ field }) => (
                 <FormItem>
@@ -308,11 +346,11 @@ export default function NewAdventureForm() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="m~example.com">
-                        m~example.com
+                        easy
                       </SelectItem>
-                      <SelectItem value="m~google.com">m~google.com</SelectItem>
+                      <SelectItem value="m~google.com">medium</SelectItem>
                       <SelectItem value="m~support.com">
-                        m~support.com
+                        hard
                       </SelectItem>
                     </SelectContent>
                   </Select>

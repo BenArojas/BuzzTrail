@@ -7,6 +7,8 @@ import NewAdventureForm, {
   resolver,
 } from "~/components/NewAdventureForm";
 import { createAdventure } from "~/db/adventure.server";
+import { redirect } from "@remix-run/node";
+
 
 export async function action({ request }: ActionFunctionArgs) {
   const user = await requireUser(request);
@@ -27,6 +29,10 @@ export async function action({ request }: ActionFunctionArgs) {
     country: country[0],
     state: country[1],
   });
+  const id = response.id
+  if (id) {
+    throw redirect(`/adventure/${id}`)
+  }
 
   // Do something with the data
   return Response.json(data);
