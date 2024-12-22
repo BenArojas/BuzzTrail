@@ -26,3 +26,38 @@ export async function createAdventure(
     data: { ...data, userId: userId },
   });
 }
+
+export async function getNextAdventures(userId: string) {
+  return prisma.adventure.findMany({
+    where: {
+      userId: userId,
+      startDate: {
+        gt: new Date(), 
+      },
+    },
+    orderBy: {
+      startDate: 'asc', 
+    },
+  });
+}
+
+
+export async function getPreviousAdventures(userId: string) {
+  return prisma.adventure.findMany({
+    where: {
+      userId: userId,
+      startDate: {
+        lt: new Date()
+      },
+    },
+  });
+}
+
+export async function getCompletedAdventures(userId: string) {
+  return prisma.adventure.findMany({
+    where: {
+      userId: userId,
+      status: "COMPLETED"
+    },
+  });
+}

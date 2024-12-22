@@ -39,7 +39,7 @@ model Adventure {
   endDate      DateTime
   budget       Int?
   // This field is used to store the difficulty level of the adventure (e.g., "easy", "medium", "hard")
-  difficulty   String
+  difficulty   AdventureDifficulty
   notes        String?
 
   // This field is used to store the status of the adventure (e.g., "active", "completed")
@@ -50,4 +50,11 @@ enum AdventureStatus {
   NOT_STARTED
   ACTIVE
   COMPLETED
+  CANCELED
+}
+
+enum AdventureDifficulty {
+  easy
+  medium
+  hard
 }

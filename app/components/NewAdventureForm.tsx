@@ -41,7 +41,7 @@ const formSchema = z.object({
   location: z.string(),
   description: z.string(),
   budget: z.coerce.number().optional(),
-  participants: z.coerce.number(),
+  participants: z.coerce.number().gt(0, "Participants must be greater than 0"),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   difficulty: z.string(),
@@ -65,8 +65,8 @@ export default function NewAdventureForm() {
       location: undefined,
       description: undefined,
       budget: 0,
-      participants: 0,
-      difficulty: undefined,
+      participants: 1,
+      difficulty: "easy",
       notes: "",
       startDate: new Date(),
       endDate: new Date(),
@@ -345,11 +345,11 @@ export default function NewAdventureForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="m~example.com">
+                      <SelectItem value="easy">
                         easy
                       </SelectItem>
-                      <SelectItem value="m~google.com">medium</SelectItem>
-                      <SelectItem value="m~support.com">
+                      <SelectItem value="medium">medium</SelectItem>
+                      <SelectItem value="hard">
                         hard
                       </SelectItem>
                     </SelectContent>
