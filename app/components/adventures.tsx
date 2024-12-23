@@ -1,6 +1,4 @@
-import * as React from "react";
-import { Check, ChevronRight, Mountain } from "lucide-react";
-
+import { ChevronRight, Mountain } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,16 +15,15 @@ import {
   SidebarSeparator,
 } from "~/components/ui/sidebar";
 import { Adventure } from "@prisma/client";
-import { Link } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
+import { cn } from "~/lib/utils";
+import StatusIcon from "~/components/StatusIcon";
 
-// interface Adventure {
-//   id: number;
-//   name: string;
-//   description: string;
-//   date: Date;
-// }
+
 
 export function Adventures({ adventures }: { adventures: Adventure[] }) {
+  const location = useLocation();
+  const currentAdventureId = location.pathname.split("/adventure/")[1];
   return (
     <>
       <SidebarGroup className="py-0">
@@ -44,16 +41,18 @@ export function Adventures({ adventures }: { adventures: Adventure[] }) {
           <CollapsibleContent>
             <SidebarGroupContent>
               <SidebarMenu>
-                {adventures.map((adventure, Index) => (
+                {adventures.map((adventure) => (
                   <SidebarMenuItem key={adventure.id}>
                     <Link
-                      className={sidebarMenuButtonVariants()}
+                      className={cn(
+                        sidebarMenuButtonVariants(),
+                        adventure.id === currentAdventureId && "bg-sidebar-accent"
+                      )}
                       to={`/adventure/${adventure.id}`}
                     >
-                      <div
-                        data-active={Index === 0}
-                        className="group/calendar-item flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground data-[active=true]:border-sidebar-primary data-[active=true]:bg-sidebar-primary"
-                      ></div>
+                      <div className="flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground">
+                        <StatusIcon status={adventure.status} />
+                      </div>
                       {adventure.name}
                     </Link>
                   </SidebarMenuItem>

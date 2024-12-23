@@ -50,7 +50,7 @@ const formSchema = z.object({
 export const resolver = zodResolver(formSchema);
 export type AdventureFormData = z.infer<typeof formSchema>;
 export default function NewAdventureForm() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<Number>(1);
   const [countryName, setCountryName] = useState<string>("");
   const [stateName, setStateName] = useState<string>("");
 
