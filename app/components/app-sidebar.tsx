@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronRight, Plus, House, Mountain } from "lucide-react";
+import { Check, ChevronRight, Plus, HomeIcon as House, Mountain } from 'lucide-react';
 
 import { Adventures } from "~/components/adventures";
 import { DatePicker } from "~/components/date-picker";
@@ -35,32 +35,13 @@ const data = {
     email: "m@example.com",
     avatar:
       "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.britannica.com%2Fanimal%2Fcat&psig=AOvVaw3RShbRfsrkKYyz5-92YnzK&ust=1734523270354000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMC4m-7grooDFQAAAAAdAAAAABAE",
-  },
-  adventures: [
-    {
-      id: 1,
-      name: "Adventure 1",
-      description: "This is a fun adventure",
-      date: new Date(),
-    },
-    {
-      id: 2,
-      name: "Adventure 2",
-      description: "Another adventure",
-      date: new Date(),
-    },
-    {
-      id: 3,
-      name: "Adventure 3",
-      description: "A third adventure",
-      date: new Date(),
-    },
-  ],
+  }
 };
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   adventures: Adventure[];
 }
+
 export function AppSidebar({ adventures, ...props }: AppSidebarProps) {
   return (
     <Sidebar {...props}>
@@ -79,7 +60,7 @@ export function AppSidebar({ adventures, ...props }: AppSidebarProps) {
         <SidebarSeparator className="mx-0" />
         <Adventures adventures={adventures} />
         <SidebarSeparator className="mx-0" />
-        <DatePicker />
+        <DatePicker adventures={adventures} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -95,3 +76,4 @@ export function AppSidebar({ adventures, ...props }: AppSidebarProps) {
     </Sidebar>
   );
 }
+
