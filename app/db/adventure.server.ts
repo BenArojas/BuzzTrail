@@ -7,6 +7,9 @@ export async function getAdventure(userId: string, id: string) {
       id,
       userId: userId,
     },
+    include:{
+      items: true
+    }
   });
 }
 

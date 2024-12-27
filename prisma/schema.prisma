@@ -23,27 +23,55 @@ model User {
   adventures Adventure[]
 }
 
+model Item {
+  id          String     @id @default(cuid())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  name        String
+  price       Int?
+  quantity    Int?
+  importance  ItemImportance
+  status      itemStatus
+  Adventure   Adventure? @relation(fields: [adventureId], references: [id])
+  adventureId String
+}
+
 model Adventure {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String              @id @default(cuid())
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  User         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   name         String
   country      String
   participants Int
   state        String?
   location     String
-  description  String   @db.Text
+  description  String              @db.Text
   startDate    DateTime
   endDate      DateTime
   budget       Int?
+  items        Item[]            
   // This field is used to store the difficulty level of the adventure (e.g., "easy", "medium", "hard")
   difficulty   AdventureDifficulty
   notes        String?
 
   // This field is used to store the status of the adventure (e.g., "active", "completed")
   status AdventureStatus @default(NOT_STARTED)
+}
+
+enum itemStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum ItemImportance {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  BONUS
 }
 
 enum AdventureStatus {

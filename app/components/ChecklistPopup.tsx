@@ -1,83 +1,145 @@
-import { useState } from 'react'
-import { X } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog"
-import { Checkbox } from "~/components/ui/checkbox"
-import { Input } from "~/components/ui/input"
-import { Button } from "~/components/ui/button"
+import { useState } from 'react';
+import { X, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Button } from "~/components/ui/button";
+import { Form } from "@remix-run/react";
+import { Card } from "~/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Item } from '@prisma/client';
 
-type ChecklistItem = {
-  id: string
-  text: string
-  completed: boolean
-}
+const ItemForm = ({ onClose }) => {
+  return (
+    <Card className="p-4">
+      <Form method="post" className="space-y-4">
+        <div>
+          <Label htmlFor="name">Item Name</Label>
+          <Input id="name" name="name" required />
+        </div>
 
-export function ChecklistPopup({ isOpen, onClose, items, onUpdateItems }) {
-  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>(items)
-  const [newItemText, setNewItemText] = useState('')
+        <div>
+          <Label htmlFor="quantity">Quantity (Optional)</Label>
+          <Input id="quantity" name="quantity" type="number" min="1" />
+        </div>
 
-  const handleItemToggle = (id: string) => {
-    setChecklistItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    )
-  }
+        <div>
+          <Label htmlFor="price">Price (Optional)</Label>
+          <Input id="price" name="price" type="number" />
+        </div>
 
-  const handleAddItem = () => {
-    if (newItemText.trim()) {
-      setChecklistItems([...checklistItems, {
-        id: Date.now().toString(),
-        text: newItemText.trim(),
-        completed: false
-      }])
-      setNewItemText('')
-    }
-  }
+        <div>
+          <Label htmlFor="importance">Importance</Label>
+          <Select name="importance" required>
+            <SelectTrigger>
+              <SelectValue placeholder="Select importance" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="LOW">Low</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="HIGH">High</SelectItem>
+              <SelectItem value="CRITICAL">Critical</SelectItem>
+              <SelectItem value="BONUS">Bonus</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-  const handleSave = () => {
-    onUpdateItems(checklistItems)
-    onClose()
-  }
+        <div className="flex gap-2">
+          <Button type="submit" className="w-full">Create Item</Button>
+          <Button type="button" variant="outline" onClick={onClose} className="w-full">Cancel</Button>
+        </div>
+      </Form>
+    </Card>
+  );
+};
+
+type ChecklistPopupProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  items: Array<Item> | undefined; // If `items` can be `undefined`
+  adventureId: string | undefined;
+};
+
+export const ChecklistPopup: React.FC<ChecklistPopupProps> = ({ isOpen, onClose, items, adventureId }) => {
+  const [showNewItemForm, setShowNewItemForm] = useState(false);
+
+  const handleStatusChange = (itemId: String) => {
+    // Create a form submission to update the item status
+    const form = document.createElement('form');
+    form.method = 'post';
+    form.action = `/adventures/${adventureId}/items/${itemId}`;
+
+    const methodInput = document.createElement('input');
+    methodInput.type = 'hidden';
+    methodInput.name = '_method';
+    methodInput.value = 'patch';
+
+    form.appendChild(methodInput);
+    document.body.appendChild(form);
+    form.submit();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} >
-      <DialogContent className="bg-black [&>button]:hidden"  >
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-white dark:bg-gray-800">
         <DialogHeader>
-          <DialogTitle>Packing Checklist</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose} className="absolute right-4 top-4">
+          <DialogTitle>Adventure Checklist</DialogTitle>
+          {/* <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="absolute right-4 top-4"
+          >
             <X className="h-4 w-4" />
-          </Button>
+          </Button> */}
         </DialogHeader>
+
         <div className="space-y-4">
-          {checklistItems.map(item => (
-            <div key={item.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={item.id}
-                checked={item.completed}
-                onCheckedChange={() => handleItemToggle(item.id)}
-              />
-              <label htmlFor={item.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                {item.text}
-              </label>
+          {items.map((item: Item) => (
+            <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  checked={item?.status === 'COMPLETED'}
+                  onCheckedChange={() => handleStatusChange(item.id)}
+                />
+                <div>
+                  <p className="font-medium">{item.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {item?.quantity > 0 ? <span>Quantity: {item.quantity} • </span> : null}
+                    Importance: {item?.importance?.toLowerCase()}
+                  </p>
+                </div>
+              </div>
+              {item.price && (
+                <span className="text-sm font-medium">
+                  ${item.price}
+                </span>
+              )}
             </div>
           ))}
-          <div className="flex space-x-2">
-            <Input
-              value={newItemText}
-              onChange={(e) => setNewItemText(e.target.value)}
-              placeholder="Add new item"
-              
-            />
-            <Button onClick={handleAddItem} variant="outline" >
-              Add
+
+          {!showNewItemForm ? (
+            <Button
+              onClick={() => setShowNewItemForm(true)}
+              className="w-full"
+              variant="outline"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Item
             </Button>
-          </div>
+          ) : (
+            <ItemForm onClose={() => setShowNewItemForm(false)} />
+          )}
         </div>
-        <Button onClick={handleSave} className="w-full mt-4 ">
-          Save Changes
-        </Button>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 

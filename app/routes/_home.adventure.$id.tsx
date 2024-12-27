@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Calendar, CheckSquare, DollarSign, MapPin } from "lucide-react";
 import { useState } from "react";
 import { requireUser } from "~/auth/auth";
@@ -6,7 +6,9 @@ import { ChecklistPopup } from "~/components/ChecklistPopup";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { getAdventure } from "~/db/adventure.server";
 import invariant from "tiny-invariant";
-import { useLoaderData } from "@remix-run/react";
+import { redirect, useLoaderData } from "@remix-run/react";
+import { $Enums, itemStatus, Prisma } from "@prisma/client";
+import { createChecklistItem } from "~/db/item.server";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -18,6 +20,34 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   return { adventure };
 }
 
+export async function action({ request, params }: ActionFunctionArgs) {
+  const user = await requireUser(request);
+  invariant(user, "user is not logged in");
+  // Extract and validate the adventureId from params
+  const adventureId = params.id;
+  invariant(adventureId, "adventureId not found");
+  const formData = await request.formData();
+  // Prepare the data according to ItemCreateWithoutAdventureInput type
+  const data: Prisma.ItemCreateWithoutAdventureInput = {
+    name: formData.get("name") as string,
+    quantity: parseInt(formData.get("quantity") as string),
+    importance: formData.get("importance") as $Enums.ItemImportance,
+    // Set default status for new items
+    status: itemStatus.IN_PROGRESS,
+    // Only include price if it's not empty
+    ...(formData.get("price") 
+      ? { price: parseFloat(formData.get("price") as string) } 
+      : { price: null })
+  };
+  console.log(formData)
+  // Create the checklist item
+  const item = await createChecklistItem(adventureId, data);
+
+  // Redirect back to the adventure page
+  return redirect(`/adventure/${adventureId}`);
+
+}
+
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -25,15 +55,13 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-const initialChecklist = [
-  { id: "1", text: "Hiking Boots", completed: true },
-  { id: "2", text: "Sleeping Bag", completed: false },
-  { id: "3", text: "First Aid Kit", completed: true },
-];
 export default function Index() {
   const { adventure } = useLoaderData<typeof loader>();
-  const [checklistItems, setChecklistItems] = useState(initialChecklist);
-  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+  // const [checklistItems, setChecklistItems] = useState(initialChecklist);
+  const [isChecklistOpen, setIsChecklistOpen] = useState<boolean>(false);
+  const checklistItemsCompleted = adventure?.items?.filter(
+    (item) => item.status === 'COMPLETED'
+  ).length || 0;
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -55,7 +83,7 @@ export default function Index() {
             <DollarSign className="h-5 w-5 " />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold ">$2,450</div>
+            <div className="text-2xl font-bold ">{adventure?.budget}</div>
             <p className="text-xs ">Remaining budget</p>
           </CardContent>
         </Card>
@@ -68,15 +96,15 @@ export default function Index() {
             <CheckSquare className="h-5 w-5 " />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold ">8/12</div>
+            <div className="text-2xl font-bold ">{checklistItemsCompleted}/{adventure?.items.length}</div>
             <p className="text-xs ">Items packed</p>
           </CardContent>
         </Card>
         <ChecklistPopup
           isOpen={isChecklistOpen}
           onClose={() => setIsChecklistOpen(false)}
-          items={checklistItems}
-          onUpdateItems={setChecklistItems}
+          items={adventure?.items}
+          adventureId={adventure?.id}
         />
       </div>
       <Card className="bg-black/50 border-yellow-500/50 shadow-xl">
