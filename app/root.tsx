@@ -16,6 +16,7 @@ import {
 } from "remix-themes";
 import clsx from "clsx";
 import "./tailwind.css";
+import { Toaster } from "./components/ui/toaster";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { getTheme } = await themeSessionResolver(request);
@@ -47,6 +48,7 @@ function LayoutProvided({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>

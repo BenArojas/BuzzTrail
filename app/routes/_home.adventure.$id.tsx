@@ -84,7 +84,7 @@ export default function Index() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold ">{adventure?.budget}</div>
-            <p className="text-xs ">Remaining budget</p>
+            {/* <p className="text-xs ">Remaining budget</p> */}
           </CardContent>
         </Card>
         <Card

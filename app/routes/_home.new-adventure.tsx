@@ -6,8 +6,12 @@ import NewAdventureForm, {
   AdventureFormData,
   resolver,
 } from "~/components/NewAdventureForm";
-import { createAdventure } from "~/db/adventure.server";
+import { checkForOverlappingAdventures, createAdventure } from "~/db/adventure.server";
 import { redirect } from "@remix-run/node";
+import { $Enums } from "@prisma/client";
+import { useActionData } from "@remix-run/react";
+import { useEffect } from "react";
+import { useToast } from "~/hooks/use-toast";
 
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -24,10 +28,23 @@ export async function action({ request }: ActionFunctionArgs) {
     return Response.json({ errors, defaultValues });
   }
   const { country, ...createData } = data;
+  const overlappingAdventures = await checkForOverlappingAdventures(user.id, createData.startDate, createData.endDate)
+  if (overlappingAdventures) {
+    return Response.json({
+      errors: {
+        message: "You already have an adventure scheduled during this period",
+      }
+    });
+  }
+  // Validate the difficulty value
+  if (!['easy', 'medium', 'hard'].includes(createData.difficulty)) {
+    throw new Error('Invalid difficulty level');
+  }
   const response = await createAdventure(user.id, {
     ...createData,
     country: country[0],
     state: country[1],
+    difficulty: createData.difficulty as $Enums.AdventureDifficulty
   });
   const id = response.id
   if (id) {
@@ -38,6 +55,20 @@ export async function action({ request }: ActionFunctionArgs) {
   return Response.json(data);
 }
 function NewAdventure() {
+  const actionData = useActionData<typeof action>();
+  console.log(actionData)
+  const { toast } = useToast()
+  
+  useEffect(() => {
+    if (actionData?.errors) {
+      toast({
+        variant: "destructive",
+        title: "Scheduling Conflict",
+        description: actionData.errors.message,
+      });
+    }
+  }, [actionData]);
+
   return (
     <div className="">
       <h1 className="text-center mb-10">New Adventure</h1>

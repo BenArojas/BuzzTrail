@@ -46,7 +46,13 @@ const formSchema = z.object({
   endDate: z.coerce.date(),
   difficulty: z.string(),
   notes: z.string().optional(),
-});
+}).refine(
+  (data) => data.startDate <= data.endDate,
+  {
+    message: "End date must be after start date",
+    path: ["endDate"]
+  }
+);
 export const resolver = zodResolver(formSchema);
 export type AdventureFormData = z.infer<typeof formSchema>;
 export default function NewAdventureForm() {
@@ -76,17 +82,17 @@ export default function NewAdventureForm() {
     },
   });
 
-  const { reset, formState } = form;
-  const { isSubmitSuccessful } = formState;
+  // const { reset, formState } = form;
+  // const { isSubmitSuccessful } = formState;
 
   // Reset the form when the submission is successful
   // might not be necessary since we redirect to the newly created adventure - let Yahel check
-  useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset();
-      setCurrentPage(1)
-    }
-  }, [isSubmitSuccessful, reset]);
+  // useEffect(() => {
+  //   if (isSubmitSuccessful) {
+  //     reset();
+  //     setCurrentPage(1)
+  //   }
+  // }, [isSubmitSuccessful, reset]);
 
   const handleNext = () => {
     // Validate first page fields before moving to next page
