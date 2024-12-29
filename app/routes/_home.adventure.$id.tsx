@@ -1,4 +1,8 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { Calendar, CheckSquare, DollarSign, MapPin } from "lucide-react";
 import { useState } from "react";
 import { requireUser } from "~/auth/auth";
@@ -9,6 +13,9 @@ import invariant from "tiny-invariant";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { $Enums, itemStatus, Prisma } from "@prisma/client";
 import { createChecklistItem } from "~/db/item.server";
+import AdvantureCheckList from "~/components/AdvantureCheckList";
+import AdventureBudgetCard from "~/components/AdventureBudgetCard";
+import AdventureTimeTracker from "~/components/AdventureTimeTracker";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -16,7 +23,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 
   const { id } = params;
   invariant(id, "Adventure id required!");
-  const adventure = await getAdventure(user?.id, id);
+  const adventure = await getAdventure(user.id, id);
+  if (!adventure) return redirect("/");
+
   return { adventure };
 }
 
@@ -35,17 +44,15 @@ export async function action({ request, params }: ActionFunctionArgs) {
     // Set default status for new items
     status: itemStatus.IN_PROGRESS,
     // Only include price if it's not empty
-    ...(formData.get("price") 
-      ? { price: parseFloat(formData.get("price") as string) } 
-      : { price: null })
+    ...(formData.get("price")
+      ? { price: parseFloat(formData.get("price") as string) }
+      : { price: null }),
   };
-  console.log(formData)
   // Create the checklist item
   const item = await createChecklistItem(adventureId, data);
 
   // Redirect back to the adventure page
   return redirect(`/adventure/${adventureId}`);
-
 }
 
 export const meta: MetaFunction = () => {
@@ -57,55 +64,13 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const { adventure } = useLoaderData<typeof loader>();
-  // const [checklistItems, setChecklistItems] = useState(initialChecklist);
-  const [isChecklistOpen, setIsChecklistOpen] = useState<boolean>(false);
-  const checklistItemsCompleted = adventure?.items?.filter(
-    (item) => item.status === 'COMPLETED'
-  ).length || 0;
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <Card className="bg-black/50 border-yellow-500/50 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="font-bold">Time Left</CardTitle>
-            <Calendar className="h-5 w-5 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold ">15</div>
-            <p className="text-xs ">Days until departure</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black/50 border-yellow-500/50 shadow-xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="">Budget</CardTitle>
-            <DollarSign className="h-5 w-5 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold ">{adventure?.budget}</div>
-            {/* <p className="text-xs ">Remaining budget</p> */}
-          </CardContent>
-        </Card>
-        <Card
-          className="bg-black/50 border-yellow-500/50 shadow-xl cursor-pointer"
-          onClick={() => setIsChecklistOpen(true)}
-        >
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className=" font-bold">Checklist</CardTitle>
-            <CheckSquare className="h-5 w-5 " />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold ">{checklistItemsCompleted}/{adventure?.items.length}</div>
-            <p className="text-xs ">Items packed</p>
-          </CardContent>
-        </Card>
-        <ChecklistPopup
-          isOpen={isChecklistOpen}
-          onClose={() => setIsChecklistOpen(false)}
-          items={adventure?.items}
-          adventureId={adventure?.id}
-        />
+        <AdventureTimeTracker endDate={adventure.endDate} startDate={adventure.startDate}/>
+        <AdventureBudgetCard budget={adventure.budget} />
+        <AdvantureCheckList advetureId={adventure.id} items={adventure.items} />
       </div>
       <Card className="bg-black/50 border-yellow-500/50 shadow-xl">
         <CardHeader>

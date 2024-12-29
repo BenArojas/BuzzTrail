@@ -8,8 +8,8 @@ export async function getAdventure(userId: string, id: string) {
       userId: userId,
     },
     include: {
-      items: true
-    }
+      items: true,
+    },
   });
 }
 
@@ -39,18 +39,17 @@ export async function getNextAdventures(userId: string) {
       },
     },
     orderBy: {
-      startDate: 'asc',
+      startDate: "asc",
     },
   });
 }
-
 
 export async function getPreviousAdventures(userId: string) {
   return prisma.adventure.findMany({
     where: {
       userId: userId,
       startDate: {
-        lt: new Date()
+        lt: new Date(),
       },
     },
   });
@@ -60,12 +59,16 @@ export async function getCompletedAdventures(userId: string) {
   return prisma.adventure.findMany({
     where: {
       userId: userId,
-      status: "COMPLETED"
+      status: "COMPLETED",
     },
   });
 }
 
-export async function checkForOverlappingAdventures(userId: string, startDate: Date, endDate: Date) {
+export async function checkForOverlappingAdventures(
+  userId: string,
+  startDate: Date,
+  endDate: Date
+) {
   return prisma.adventure.findFirst({
     where: {
       userId,
@@ -73,19 +76,19 @@ export async function checkForOverlappingAdventures(userId: string, startDate: D
         // Case 1: New adventure starts during an existing adventure
         {
           startDate: { lte: startDate },
-          endDate: { gte: startDate }
+          endDate: { gte: startDate },
         },
         // Case 2: New adventure ends during an existing adventure
         {
           startDate: { lte: endDate },
-          endDate: { gte: endDate }
+          endDate: { gte: endDate },
         },
         // Case 3: New adventure completely contains an existing adventure
         {
           startDate: { gte: startDate },
-          endDate: { lte: endDate }
-        }
-      ]
-    }
+          endDate: { lte: endDate },
+        },
+      ],
+    },
   });
 }

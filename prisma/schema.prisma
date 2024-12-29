@@ -24,15 +24,15 @@ model User {
 }
 
 model Item {
-  id          String     @id @default(cuid())
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id          String         @id @default(cuid())
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   name        String
   price       Int?
   quantity    Int?
   importance  ItemImportance
   status      itemStatus
-  Adventure   Adventure? @relation(fields: [adventureId], references: [id])
+  Adventure   Adventure      @relation(fields: [adventureId], references: [id], onDelete: Cascade)
   adventureId String
 }
 
@@ -51,7 +51,7 @@ model Adventure {
   startDate    DateTime
   endDate      DateTime
   budget       Int?
-  items        Item[]            
+  items        Item[]
   // This field is used to store the difficulty level of the adventure (e.g., "easy", "medium", "hard")
   difficulty   AdventureDifficulty
   notes        String?
