@@ -50,7 +50,7 @@ export function Adventures({ adventures }: { adventures: Adventure[] }) {
                       )}
                       to={`/adventure/${adventure.id}`}
                     >
-                      <div className="flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm border border-sidebar-border text-sidebar-primary-foreground">
+                      <div className="flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm  text-sidebar-primary-foreground">
                         <StatusIcon status={adventure.status} />
                       </div>
                       {adventure.name}

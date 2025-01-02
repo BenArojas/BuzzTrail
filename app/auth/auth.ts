@@ -8,7 +8,7 @@ export async function requireUser(request: Request) {
   if (!userId) {
     throw redirect("/login");
   }
-  return prisma.user.findFirst({ where: { id: userId } });
+  return await prisma.user.findFirst({ where: { id: userId } });
 }
 export async function requireAnonymous(request: Request) {
   const cookieString = request.headers.get("Cookie");

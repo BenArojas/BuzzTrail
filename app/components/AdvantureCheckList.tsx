@@ -34,7 +34,6 @@ function AdvantureCheckList({ items, advetureId }: AdvantureCheckListProps) {
         items={items}
         adventureId={advetureId}
       />
-      ;
     </>
   );
 }

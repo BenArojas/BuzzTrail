@@ -13,12 +13,12 @@ export default function PageBreadcrumbs() {
   const paths: String = location.pathname;
   const pathNames: String[] = paths.split("/").filter((path) => path);
 
-  const breadcrumbsItems: { name: string; to: string } = [
-    {
-      name: "Home",
-      to: "/",
-    },
-  ];
+  // const breadcrumbsItems: { name: string; to: string } = [
+  //   {
+  //     name: "Home",
+  //     to: "/",
+  //   },
+  // ];
   return (
     <Breadcrumb>
       <BreadcrumbList>

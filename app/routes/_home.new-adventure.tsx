@@ -56,7 +56,6 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 function NewAdventure() {
   const actionData = useActionData<typeof action>();
-  console.log(actionData)
   const { toast } = useToast()
   
   useEffect(() => {
