@@ -46,10 +46,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
   const weatherResult = await weatherService.getWeatherByLocation(location);
   const weather = weatherResult.getBestMatch();
-  if (weather) {
-    console.log(`Temperature in ${weather.name}: ${weather.main.temp}°C`);
-    console.log(weather);
-  }
 
   return {
     upcomingAdventures,

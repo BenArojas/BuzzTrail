@@ -16,6 +16,8 @@ import { createChecklistItem } from "~/db/item.server";
 import AdvantureCheckList from "~/components/AdvantureCheckList";
 import AdventureBudgetCard from "~/components/AdventureBudgetCard";
 import AdventureTimeTracker from "~/components/AdventureTimeTracker";
+import { Map } from "react-map-gl";
+import MapboxExample from "~/components/Map";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -68,7 +70,10 @@ export default function Index() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <AdventureTimeTracker endDate={adventure.endDate} startDate={adventure.startDate}/>
+        <AdventureTimeTracker
+          endDate={adventure.endDate}
+          startDate={adventure.startDate}
+        />
         <AdventureBudgetCard budget={adventure.budget} />
         <AdvantureCheckList advetureId={adventure.id} items={adventure.items} />
       </div>
@@ -81,7 +86,18 @@ export default function Index() {
         </CardHeader>
         <CardContent>
           <div className="aspect-video rounded-lg bg-black/40 flex items-center justify-center">
-            <p className="">{JSON.stringify(adventure)}</p>
+            {/* <p className="">{JSON.stringify(adventure)}</p> */}
+            {/* <Map
+              mapboxAccessToken="pk.eyJ1IjoibmF2aWdhdG9yLWFsbGlnYXRvci1iZW4iLCJhIjoiY201ZjluNnphMWt4NjJscjMxMW53NGo0eSJ9.nFMY6wNn67kN3bC_7cUrTg"
+              initialViewState={{
+                longitude: 32.109333,
+                latitude: 34.855499,
+                zoom: 2.3,
+              }}
+              style={{ width: 600, height: 400 }}
+              mapStyle="mapbox://styles/mapbox/streets-v9"
+            /> */}
+            <MapboxExample/>
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
