@@ -93,9 +93,8 @@ class WeatherService {
   async getWeatherByLocation({ city, state, country }: LocationQuery): Promise<WeatherResult> {
     try {
       const countryCode = this.getCountryCode(country);
-      
       let geoEndpoint = `${this.geoUrl}/direct?`;
-      
+  
       if (city) {
         geoEndpoint += `q=${encodeURIComponent(city)}`;
         if (state) {
@@ -103,41 +102,63 @@ class WeatherService {
         }
         geoEndpoint += `,${countryCode}`;
       } else {
-        // If no city provided, search by country/state
         geoEndpoint += `q=${state ? encodeURIComponent(state) : ''},${countryCode}`;
       }
-      
+  
       geoEndpoint += `&limit=5&appid=${this.apiKey}`;
-
-      const geoResponse = await fetch(geoEndpoint);
+  
+      let geoResponse = await fetch(geoEndpoint);
       if (!geoResponse.ok) {
         throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
       }
-
-      const locations = await geoResponse.json();
-      
-      // Filter locations to match the requested country code
-      const filteredLocations = locations.filter(
-        location => location.country === countryCode
-      );
-
-      if (!filteredLocations.length) {
-        throw new Error('No locations found for the given criteria');
+  
+      let locations = await geoResponse.json();
+      let filteredLocations = locations.filter(location => location.country === countryCode);
+  
+      if (!filteredLocations.length && state) {
+        console.warn('No matches found. Retrying with trimmed state...');
+  
+        const trimmedState = state.includes(' ') ? state.split(' ')[0] : state;
+        geoEndpoint = `${this.geoUrl}/direct?q=${encodeURIComponent(trimmedState)},${countryCode}&limit=5&appid=${this.apiKey}`;
+  
+        geoResponse = await fetch(geoEndpoint);
+        if (!geoResponse.ok) {
+          throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
+        }
+  
+        locations = await geoResponse.json();
+        filteredLocations = locations.filter(location => location.country === countryCode);
       }
-
-      // Fetch weather only for locations in the specified country
-      const weatherPromises = filteredLocations.map(location => 
+  
+      if (!filteredLocations.length) {
+        console.warn('No matches found. Retrying with country only...');
+  
+        geoEndpoint = `${this.geoUrl}/direct?q=${countryCode}&limit=5&appid=${this.apiKey}`;
+  
+        geoResponse = await fetch(geoEndpoint);
+        if (!geoResponse.ok) {
+          throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
+        }
+  
+        locations = await geoResponse.json();
+        filteredLocations = locations.filter(location => location.country === countryCode);
+      }
+  
+      if (!filteredLocations.length) {
+        throw new Error('No locations found for the given criteria.');
+      }
+  
+      const weatherPromises = filteredLocations.map(location =>
         this.getWeatherByCoordinates(location.lat, location.lon)
       );
-
+  
       const weatherData = await Promise.all(weatherPromises);
       return new WeatherResult(weatherData);
-      
     } catch (error) {
       throw new Error(`Failed to fetch weather data: ${error.message}`);
     }
   }
-
+  
   private async getWeatherByCoordinates(lat: number, lon: number): Promise<WeatherData> {
     try {
       const response = await fetch(

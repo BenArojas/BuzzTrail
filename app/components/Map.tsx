@@ -1,70 +1,84 @@
-import React, { useEffect, useRef } from 'react';
-import mapboxgl from 'mapbox-gl';
+import { useRef, useEffect, useState } from 'react'
+import mapboxgl from 'mapbox-gl'
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const MapboxExample = () => {
-  const mapContainerRef = useRef();
-  const mapRef = useRef();
+const INITIAL_CENTER = [
+  -74.0242,
+  40.6941
+]
+const INITIAL_ZOOM = 10.12
+
+
+const MapboxExample = ({ mapApiKey }) => {
+  const mapRef = useRef()
+  const mapContainerRef = useRef()
+
+  const [center, setCenter] = useState(INITIAL_CENTER)
+  const [zoom, setZoom] = useState(INITIAL_ZOOM)
+
 
   useEffect(() => {
-    mapboxgl.accessToken = 'pk.eyJ1IjoibmF2aWdhdG9yLWFsbGlnYXRvci1iZW4iLCJhIjoiY201ZjluNnphMWt4NjJscjMxMW53NGo0eSJ9.nFMY6wNn67kN3bC_7cUrTg';
+    mapboxgl.accessToken = mapApiKey;
 
     mapRef.current = new mapboxgl.Map({
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-74.0066, 40.7135],
-      zoom: 15.5,
-      pitch: 45,
-      bearing: -17.6,
-      container: 'map',
-      antialias: true
+      container: mapContainerRef.current,
+      center: center,
+      zoom: zoom
     });
 
-    mapRef.current.on('style.load', () => {
-      const layers = mapRef.current.getStyle().layers;
-      const labelLayerId = layers.find(
-        (layer) => layer.type === 'symbol' && layer.layout['text-field']
-      ).id;
+    mapRef.current.on('move', () => {
+      // get the current center coordinates and zoom level from the map
+      const mapCenter = mapRef.current.getCenter()
+      const mapZoom = mapRef.current.getZoom()
 
-      mapRef.current.addLayer(
-        {
-          id: 'add-3d-buildings',
-          source: 'composite',
-          'source-layer': 'building',
-          filter: ['==', 'extrude', 'true'],
-          type: 'fill-extrusion',
-          minzoom: 15,
-          paint: {
-            'fill-extrusion-color': '#aaa',
-            'fill-extrusion-height': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              15,
-              0,
-              15.05,
-              ['get', 'height']
-            ],
-            'fill-extrusion-base': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              15,
-              0,
-              15.05,
-              ['get', 'min_height']
-            ],
-            'fill-extrusion-opacity': 0.6
-          }
-        },
-        labelLayerId
-      );
-    });
+      // update state
+      setCenter([mapCenter.lng, mapCenter.lat])
+      setZoom(mapZoom)
+    })
 
-    return () => mapRef.current.remove();
-  }, []);
+    return () => {
+      mapRef.current.remove()
+    }
+  }, [])
 
-  return <div id="map" ref={mapContainerRef} style={{ height: '100%', width: '100%' }}></div>;
+  const handleButtonClick = () => {
+    mapRef.current.flyTo({
+      center: INITIAL_CENTER,
+      zoom: INITIAL_ZOOM
+    })
+  }
+
+
+
+  return (
+    <>
+      <div
+        id="map-container"
+        ref={mapContainerRef}
+        className="w-full h-full rounded-lg"
+      />
+      <div
+        id="info-box"
+        className="absolute top-0 left-0 z-10 flex flex-col p-4 space-y-2"
+      >
+        <div
+          id="sidebar"
+          className="bg-blue-950 bg-opacity-60 text-white p-2 font-mono rounded"
+        >
+          Longitude: {center[0].toFixed(4)} | Latitude: {center[1].toFixed(4)} | Zoom: {zoom.toFixed(2)}
+        </div>
+        <button
+          id="reset-button"
+          onClick={handleButtonClick}
+          className="bg-blue-100 px-4 py-2 rounde text-black cursor-pointer w-20"
+        >
+          Reset
+        </button>
+      </div>
+    </>
+
+  )
 };
 
 export default MapboxExample;

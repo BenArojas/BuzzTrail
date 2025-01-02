@@ -27,8 +27,8 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(id, "Adventure id required!");
   const adventure = await getAdventure(user.id, id);
   if (!adventure) return redirect("/");
-
-  return { adventure };
+  const mapApiKey = process.env.MAPBOX_API_KEY
+  return { adventure, mapApiKey };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -65,7 +65,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { adventure } = useLoaderData<typeof loader>();
+  const { adventure, mapApiKey } = useLoaderData<typeof loader>();
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -85,19 +85,8 @@ export default function Index() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="aspect-video rounded-lg bg-black/40 flex items-center justify-center">
-            {/* <p className="">{JSON.stringify(adventure)}</p> */}
-            {/* <Map
-              mapboxAccessToken="pk.eyJ1IjoibmF2aWdhdG9yLWFsbGlnYXRvci1iZW4iLCJhIjoiY201ZjluNnphMWt4NjJscjMxMW53NGo0eSJ9.nFMY6wNn67kN3bC_7cUrTg"
-              initialViewState={{
-                longitude: 32.109333,
-                latitude: 34.855499,
-                zoom: 2.3,
-              }}
-              style={{ width: 600, height: 400 }}
-              mapStyle="mapbox://styles/mapbox/streets-v9"
-            /> */}
-            <MapboxExample/>
+        <div className="w-[80vw] h-[60vh] rounded-lg bg-black/40 flex justify-center items-center relative">
+                <MapboxExample mapApiKey={mapApiKey}/>
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
