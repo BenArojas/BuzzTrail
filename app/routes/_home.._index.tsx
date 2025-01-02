@@ -23,7 +23,7 @@ import {
   getPreviousAdventures,
 } from "~/db/adventure.server";
 import { Link, useLoaderData } from "@remix-run/react";
-import { weatherService } from "~/api/weatherService";
+import { WeatherService } from "~/api/weatherService";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -44,6 +44,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     country: upcomingAdventures?.[0]?.country ?? "israel",
     state: upcomingAdventures?.[0]?.state ?? "jerusalem",
   };
+  const weatherService = new WeatherService(process.env.OPENWEATHER_API_KEY!);
   const weatherResult = await weatherService.getWeatherByLocation(location);
   const weather = weatherResult.getBestMatch();
 

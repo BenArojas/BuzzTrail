@@ -1,6 +1,8 @@
 // Import JSON data directly
 import countries from '~/data/countries.json'
 import states from '~/data/states.json'
+import { LocationService, LocationQuery, Coordinates } from "~/api/locationService";
+
 // Types for weather data
 interface WeatherData {
   main: {
@@ -18,22 +20,8 @@ interface WeatherData {
   };
 }
 
-interface LocationQuery {
-  city?: string;
-  state?: string;
-  country: string;
-}
-
-interface Country {
-  id: number;
-  name: string;
-  iso2: string;
-  iso3: string;
-  // ... other fields as needed
-}
-
 class WeatherResult {
-  constructor(private results: WeatherData[]) {}
+  constructor(private results: WeatherData[]) { }
 
   getBestMatch(): WeatherData | null {
     return this.results[0] || null;
@@ -59,106 +47,31 @@ class WeatherResult {
 class WeatherService {
   private readonly apiKey: string;
   private readonly baseUrl = 'https://api.openweathermap.org/data/2.5';
-  private readonly geoUrl = 'https://api.openweathermap.org/geo/1.0';
-  private readonly countries: Country[];
+  private readonly locationService: LocationService;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
-    this.countries = countries
-  }
-
-  private getCountryCode(country: string): string {
-    // If it's already a 2-letter code, validate it exists
-    if (country.length === 2) {
-      const foundCountry = this.countries.find(
-        c => c.iso2.toLowerCase() === country.toLowerCase()
-      );
-      if (foundCountry) {
-        return foundCountry.iso2;
-      }
+    this.locationService = new LocationService(apiKey);
     }
-    
-    // Search by country name
-    const foundCountry = this.countries.find(
-      c => c.name.toLowerCase() === country.toLowerCase()
-    );
-    
-    if (!foundCountry) {
-      throw new Error(`Invalid country: ${country}. Please provide a valid country name or ISO code.`);
-    }
-    
-    return foundCountry.iso2;
-  }
 
-  async getWeatherByLocation({ city, state, country }: LocationQuery): Promise<WeatherResult> {
+
+  async getWeatherByLocation({ state, country }: LocationQuery): Promise<WeatherResult> {
     try {
-      const countryCode = this.getCountryCode(country);
-      let geoEndpoint = `${this.geoUrl}/direct?`;
-  
-      if (city) {
-        geoEndpoint += `q=${encodeURIComponent(city)}`;
-        if (state) {
-          geoEndpoint += `,${encodeURIComponent(state)}`;
-        }
-        geoEndpoint += `,${countryCode}`;
-      } else {
-        geoEndpoint += `q=${state ? encodeURIComponent(state) : ''},${countryCode}`;
-      }
-  
-      geoEndpoint += `&limit=5&appid=${this.apiKey}`;
-  
-      let geoResponse = await fetch(geoEndpoint);
-      if (!geoResponse.ok) {
-        throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
-      }
-  
-      let locations = await geoResponse.json();
-      let filteredLocations = locations.filter(location => location.country === countryCode);
-  
-      if (!filteredLocations.length && state) {
-        console.warn('No matches found. Retrying with trimmed state...');
-  
-        const trimmedState = state.includes(' ') ? state.split(' ')[0] : state;
-        geoEndpoint = `${this.geoUrl}/direct?q=${encodeURIComponent(trimmedState)},${countryCode}&limit=5&appid=${this.apiKey}`;
-  
-        geoResponse = await fetch(geoEndpoint);
-        if (!geoResponse.ok) {
-          throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
-        }
-  
-        locations = await geoResponse.json();
-        filteredLocations = locations.filter(location => location.country === countryCode);
-      }
-  
-      if (!filteredLocations.length) {
-        console.warn('No matches found. Retrying with country only...');
-  
-        geoEndpoint = `${this.geoUrl}/direct?q=${countryCode}&limit=5&appid=${this.apiKey}`;
-  
-        geoResponse = await fetch(geoEndpoint);
-        if (!geoResponse.ok) {
-          throw new Error(`Geocoding API Error: ${geoResponse.statusText}`);
-        }
-  
-        locations = await geoResponse.json();
-        filteredLocations = locations.filter(location => location.country === countryCode);
-      }
-  
-      if (!filteredLocations.length) {
-        throw new Error('No locations found for the given criteria.');
-      }
-  
-      const weatherPromises = filteredLocations.map(location =>
-        this.getWeatherByCoordinates(location.lat, location.lon)
-      );
-  
-      const weatherData = await Promise.all(weatherPromises);
-      return new WeatherResult(weatherData);
+      // Use LocationService to get coordinates
+      const coordinates = await this.locationService.getCoordinates({ state, country });
+      // Get weather data for the coordinates
+      const weatherData = await this.getWeatherByCoordinates(coordinates.lat, coordinates.lng);
+      
+      return new WeatherResult([weatherData]);
     } catch (error) {
-      throw new Error(`Failed to fetch weather data: ${error.message}`);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch weather data: ${error.message}`);
+      } else {
+        throw new Error('Failed to fetch weather data: An unknown error occurred.');
+      }
     }
   }
-  
+
   private async getWeatherByCoordinates(lat: number, lon: number): Promise<WeatherData> {
     try {
       const response = await fetch(
@@ -171,10 +84,14 @@ class WeatherService {
 
       return await response.json();
     } catch (error) {
-      throw new Error(`Failed to fetch weather data: ${error.message}`);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch weather data: ${error.message}`);
+      } else {
+        throw new Error('Failed to fetch weather data: An unknown error occurred.');
+      }
     }
+
   }
 }
 
-
-  export const weatherService = new WeatherService('f6498a352ecc470eeead0b6da74c84db');
+export { WeatherService };

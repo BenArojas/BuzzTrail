@@ -1,55 +1,55 @@
-import { useRef, useEffect, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
+import { useRef, useEffect, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-const INITIAL_CENTER = [
-  -74.0242,
-  40.6941
-]
-const INITIAL_ZOOM = 10.12
+// const INITIAL_CENTER: [number, number] = [-74.0242, 40.6941];
+const INITIAL_ZOOM = 10.12;
 
+type MapProps = {
+  mapApiKey: string;
+  initialCenter: [number, number]
+};
 
-const MapboxExample = ({ mapApiKey }) => {
-  const mapRef = useRef()
-  const mapContainerRef = useRef()
+const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
+  const mapRef = useRef<mapboxgl.Map | undefined>(undefined); // Proper typing for mapRef
+  const mapContainerRef = useRef<HTMLDivElement | null>(null); // Typing for map container ref
 
-  const [center, setCenter] = useState(INITIAL_CENTER)
-  const [zoom, setZoom] = useState(INITIAL_ZOOM)
-
+  const [center, setCenter] = useState<[number, number]>(initialCenter);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   useEffect(() => {
+    if (!mapContainerRef.current) return; // Ensure the container is available
+
     mapboxgl.accessToken = mapApiKey;
 
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       center: center,
-      zoom: zoom
+      zoom: zoom,
     });
 
     mapRef.current.on('move', () => {
-      // get the current center coordinates and zoom level from the map
-      const mapCenter = mapRef.current.getCenter()
-      const mapZoom = mapRef.current.getZoom()
+      // Get the current center coordinates and zoom level from the map
+      const mapCenter = mapRef.current!.getCenter();
+      const mapZoom = mapRef.current!.getZoom();
 
-      // update state
-      setCenter([mapCenter.lng, mapCenter.lat])
-      setZoom(mapZoom)
-    })
+      // Update state
+      setCenter([mapCenter.lng, mapCenter.lat]);
+      setZoom(mapZoom);
+    });
 
     return () => {
-      mapRef.current.remove()
-    }
-  }, [])
+      mapRef.current?.remove(); // Cleanup the map instance
+    };
+  }, [mapApiKey]);
 
   const handleButtonClick = () => {
-    mapRef.current.flyTo({
-      center: INITIAL_CENTER,
-      zoom: INITIAL_ZOOM
-    })
-  }
-
-
+    mapRef.current?.flyTo({
+      center: initialCenter,
+      zoom: INITIAL_ZOOM,
+    });
+  };
 
   return (
     <>
@@ -77,8 +77,7 @@ const MapboxExample = ({ mapApiKey }) => {
         </button>
       </div>
     </>
-
-  )
+  );
 };
 
 export default MapboxExample;

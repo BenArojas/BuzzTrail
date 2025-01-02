@@ -16,8 +16,8 @@ import { createChecklistItem } from "~/db/item.server";
 import AdvantureCheckList from "~/components/AdvantureCheckList";
 import AdventureBudgetCard from "~/components/AdventureBudgetCard";
 import AdventureTimeTracker from "~/components/AdventureTimeTracker";
-import { Map } from "react-map-gl";
 import MapboxExample from "~/components/Map";
+import { LocationService } from "~/api/locationService";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -27,8 +27,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   invariant(id, "Adventure id required!");
   const adventure = await getAdventure(user.id, id);
   if (!adventure) return redirect("/");
+
+  const locationService = new LocationService(process.env.OPENWEATHER_API_KEY!);
+  const coordinates = await locationService.getCoordinates({
+    state: adventure.state,
+    country: adventure.country
+  });
   const mapApiKey = process.env.MAPBOX_API_KEY
-  return { adventure, mapApiKey };
+  invariant(mapApiKey, "mapApiKey is required!");
+
+  return { adventure, mapApiKey,initialCenter: [coordinates.lng, coordinates.lat] as [number, number]  };
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -65,7 +73,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const { adventure, mapApiKey } = useLoaderData<typeof loader>();
+  const { adventure, mapApiKey, initialCenter } = useLoaderData<typeof loader>();
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -85,8 +93,8 @@ export default function Index() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-        <div className="w-[80vw] h-[60vh] rounded-lg bg-black/40 flex justify-center items-center relative">
-                <MapboxExample mapApiKey={mapApiKey}/>
+          <div className="w-[80vw] h-[60vh] rounded-lg bg-black/40 flex justify-center items-center relative">
+            <MapboxExample mapApiKey={mapApiKey} initialCenter={initialCenter}/>
           </div>
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between p-2 bg-black/30 rounded-lg">
