@@ -3,7 +3,6 @@ import mapboxgl from 'mapbox-gl';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-// const INITIAL_CENTER: [number, number] = [-74.0242, 40.6941];
 const INITIAL_ZOOM = 10.12;
 
 type MapProps = {
@@ -12,6 +11,7 @@ type MapProps = {
 };
 
 const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
+  console.log(mapApiKey)
   const mapRef = useRef<mapboxgl.Map | undefined>(undefined); // Proper typing for mapRef
   const mapContainerRef = useRef<HTMLDivElement | null>(null); // Typing for map container ref
 
@@ -19,8 +19,7 @@ const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
   const [zoom, setZoom] = useState(INITIAL_ZOOM);
 
   useEffect(() => {
-    if (!mapContainerRef.current) return; // Ensure the container is available
-
+    if (!mapContainerRef.current) return; 
     mapboxgl.accessToken = mapApiKey;
 
     mapRef.current = new mapboxgl.Map({
@@ -40,7 +39,7 @@ const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
     });
 
     return () => {
-      mapRef.current?.remove(); // Cleanup the map instance
+      mapRef.current?.remove(); 
     };
   }, [mapApiKey]);
 
@@ -56,7 +55,7 @@ const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
       <div
         id="map-container"
         ref={mapContainerRef}
-        className="w-full h-full rounded-lg"
+        className="w-full h-full rounded-lg "
       />
       <div
         id="info-box"

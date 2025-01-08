@@ -65,12 +65,12 @@ export async function action({ request, params }: ActionFunctionArgs) {
   return redirect(`/adventure/${adventureId}`);
 }
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
-};
+// export const meta: MetaFunction = () => {
+//   return [
+//     { title: "New Remix App" },
+//     { name: "description", content: "Welcome to Remix!" },
+//   ];
+// };
 
 export default function Index() {
   const { adventure, mapApiKey, initialCenter } = useLoaderData<typeof loader>();
@@ -93,7 +93,7 @@ export default function Index() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-[80vw] h-[60vh] rounded-lg bg-black/40 flex justify-center items-center relative">
+          <div className="w-[80vw] h-[60vh] m-auto relative">
             <MapboxExample mapApiKey={mapApiKey} initialCenter={initialCenter}/>
           </div>
           <div className="mt-4 space-y-2">
