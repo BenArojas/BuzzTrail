@@ -1,11 +1,11 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@remix-run/react";
+import { Adventure } from "@prisma/client";
+import { Form, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRemixForm } from "remix-hook-form";
-import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -34,6 +34,9 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
+import AdventureDatePicker from "./AdventureDatePicker";
+
+
 
 const formSchema = z.object({
   name: z.string(),
@@ -55,7 +58,11 @@ const formSchema = z.object({
 );
 export const resolver = zodResolver(formSchema);
 export type AdventureFormData = z.infer<typeof formSchema>;
-export default function NewAdventureForm() {
+
+interface NewAdventureFormProps {
+  adventures: Adventure[]
+}
+export default function NewAdventureForm({ adventures }: NewAdventureFormProps) {
   const [currentPage, setCurrentPage] = useState<Number>(1);
   const [countryName, setCountryName] = useState<string>("");
   const [stateName, setStateName] = useState<string>("");
@@ -269,6 +276,7 @@ export default function NewAdventureForm() {
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
+                        
                       />
                     </PopoverContent>
                   </Popover>
@@ -277,6 +285,7 @@ export default function NewAdventureForm() {
                 </FormItem>
               )}
             />
+
 
             <FormField
               control={form.control}
@@ -309,6 +318,9 @@ export default function NewAdventureForm() {
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
+                        disabled={[
+                          { before: form.watch('startDate') }
+                        ]}
                       />
                     </PopoverContent>
                   </Popover>
@@ -317,7 +329,7 @@ export default function NewAdventureForm() {
                 </FormItem>
               )}
             />
-            {/* </div> */}
+
 
             <FormField
               control={form.control}

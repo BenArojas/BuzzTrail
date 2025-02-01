@@ -60,7 +60,7 @@ export function DatePicker({ adventures }: DatePickerProps) {
                     type="button"
                     onClick={() => {
                       if (dateAdventures?.length) {
-                        navigate(`/adventure/${dateAdventures[0].id}`)
+                        navigate(`/adventure/${dateAdventures[0].name}`)
                       }
                     }}
                     className={cn(

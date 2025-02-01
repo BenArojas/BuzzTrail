@@ -11,9 +11,8 @@ type MapProps = {
 };
 
 const MapboxExample = ({ mapApiKey, initialCenter }: MapProps) => {
-  console.log(mapApiKey)
-  const mapRef = useRef<mapboxgl.Map | undefined>(undefined); // Proper typing for mapRef
-  const mapContainerRef = useRef<HTMLDivElement | null>(null); // Typing for map container ref
+  const mapRef = useRef<mapboxgl.Map | undefined>(undefined); 
+  const mapContainerRef = useRef<HTMLDivElement | null>(null); 
 
   const [center, setCenter] = useState<[number, number]>(initialCenter);
   const [zoom, setZoom] = useState(INITIAL_ZOOM);

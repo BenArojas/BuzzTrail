@@ -23,7 +23,7 @@ import StatusIcon from "~/components/StatusIcon";
 
 export function Adventures({ adventures }: { adventures: Adventure[] }) {
   const location = useLocation();
-  const currentAdventureId = location.pathname.split("/adventure/")[1];
+  const currentAdventureName = location.pathname.split("/adventure/")[1];
   return (
     <>
       <SidebarGroup className="py-0">
@@ -46,9 +46,9 @@ export function Adventures({ adventures }: { adventures: Adventure[] }) {
                     <Link
                       className={cn(
                         sidebarMenuButtonVariants(),
-                        adventure.id === currentAdventureId && "bg-sidebar-accent"
+                        adventure.name === currentAdventureName && "bg-sidebar-accent"
                       )}
-                      to={`/adventure/${adventure.id}`}
+                      to={`/adventure/${adventure.name}`}
                     >
                       <div className="flex aspect-square size-4 shrink-0 items-center justify-center rounded-sm  text-sidebar-primary-foreground">
                         <StatusIcon status={adventure.status} />

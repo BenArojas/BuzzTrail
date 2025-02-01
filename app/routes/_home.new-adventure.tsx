@@ -1,4 +1,4 @@
-import type { ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { getValidatedFormData } from "remix-hook-form";
 import invariant from "tiny-invariant";
 import { requireUser } from "~/auth/auth";
@@ -6,10 +6,10 @@ import NewAdventureForm, {
   AdventureFormData,
   resolver,
 } from "~/components/NewAdventureForm";
-import { checkForOverlappingAdventures, createAdventure } from "~/db/adventure.server";
+import { checkForOverlappingAdventures, createAdventure, getUserAdventures } from "~/db/adventure.server";
 import { redirect } from "@remix-run/node";
 import { $Enums } from "@prisma/client";
-import { useActionData } from "@remix-run/react";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
 import { useToast } from "~/hooks/use-toast";
 
@@ -54,8 +54,18 @@ export async function action({ request }: ActionFunctionArgs) {
   // Do something with the data
   return Response.json(data);
 }
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const user = await requireUser(request);
+  invariant(user, "User is not logged in");
+
+  const adventures = await getUserAdventures(user?.id);
+  return { adventures };
+}
 function NewAdventure() {
   const actionData = useActionData<typeof action>();
+  const { adventures } = useLoaderData<typeof loader>();
+  
   const { toast } = useToast()
   
   useEffect(() => {
@@ -71,7 +81,7 @@ function NewAdventure() {
   return (
     <div className="">
       <h1 className="text-center mb-10">New Adventure</h1>
-      <NewAdventureForm />
+      <NewAdventureForm adventures={adventures}/>
     </div>
   );
 }

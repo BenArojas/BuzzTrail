@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "~/db.server";
 
-export async function getAdventure(userId: string, id: string) {
+export async function getAdventure(userId: string, name: string) {
   return prisma.adventure.findFirst({
     where: {
-      id,
+      name,
       userId: userId,
     },
     include: {

@@ -23,9 +23,9 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const user = await requireUser(request);
   invariant(user, "User is not logged in");
 
-  const { id } = params;
-  invariant(id, "Adventure id required!");
-  const adventure = await getAdventure(user.id, id);
+  const { name } = params;
+  invariant(name, "Adventure name required!");
+  const adventure = await getAdventure(user.id, name);
   if (!adventure) return redirect("/");
 
   const locationService = new LocationService(process.env.OPENWEATHER_API_KEY!);

@@ -42,7 +42,7 @@ model Adventure {
   updatedAt    DateTime            @updatedAt
   User         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  name         String
+  name         String @unique
   country      String
   participants Int
   state        String?
